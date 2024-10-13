@@ -22,3 +22,4 @@ exports.getActiveUsers = (req, res) => {
     res.json(results);
   });
 };
+
