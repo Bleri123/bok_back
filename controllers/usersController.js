@@ -22,3 +22,4 @@ export const getActiveUsers = (req, res) => {
     res.json(results);
   });
 };
+
