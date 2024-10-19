@@ -1,7 +1,6 @@
 // db.js
-const mysql = require("mysql2");
-const dotenv = require("dotenv");
-
+import mysql from "mysql2";
+import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
@@ -14,5 +13,4 @@ const db = mysql.createPool({
   port: process.env.DB_PORT,
 });
 
-// Export the pool/db for use in other files
-module.exports = db;
+export default db;
