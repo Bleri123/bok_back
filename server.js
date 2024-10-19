@@ -1,10 +1,10 @@
 // server.js
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const db = require("./db.js");
-const apiRoutes = require("./routes/api");
-
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import db from "./db.js";
+import apiRoutes from "./routes/api.js";
+import authRoutes from "./routes/auth.js";
 // Load environment variables
 dotenv.config();
 
@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Middleware to use routes
 app.use("/api", apiRoutes);
+app.use("/auth", authRoutes);
 
 // Sample Route
 app.get("/", (req, res) => {

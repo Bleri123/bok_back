@@ -1,7 +1,7 @@
-const db = require("../db");
+import db from "../db.js";
 
 // Get all users
-exports.getAllUsers = (req, res) => {
+export const getAllUsers = (req, res) => {
   const sql = "SELECT * FROM users";
   db.query(sql, (err, results) => {
     if (err) {
@@ -12,7 +12,7 @@ exports.getAllUsers = (req, res) => {
   });
 };
 
-exports.getActiveUsers = (req, res) => {
+export const getActiveUsers = (req, res) => {
   const sql = "SELECT * FROM users WHERE account_status_id = 1";
   db.query(sql, (err, results) => {
     if (err) {
