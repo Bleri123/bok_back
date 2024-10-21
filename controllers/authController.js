@@ -1,6 +1,7 @@
 import db from "../db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import {account_status_util} from "../utils/account_status_util.js";
 
 export const register = async (req, res) => {
   const {
@@ -121,23 +122,36 @@ export const login = (req, res) => {
     }
 
     const user = results[0];
-
-    const isMatch = await bcrypt.compare(pin, user.pin);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid email or pin" });
-    }
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "24h",
+    const isActive = isUserActive(res, user);
+    if(isActive) {
+      const isMatch = await bcrypt.compare(pin, user.pin);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Invalid email or pin" });
       }
-    );
 
-    res.json({ token });
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          role_id: user.role_id,
+          account_status_id: user.account_status_id
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "24h",
+        }
+      );
+
+
+
+      res.json({ token });
+    }
   });
 };
+
+
+const isUserActive = (res, user) => {
+    if(user?.account_status_id ) {
+      return account_status_util(res, user.account_status_id)
+    }
+}
