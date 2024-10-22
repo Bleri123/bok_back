@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
-// Middleware to use routes
+// Middleware to use routes -- prefix
 app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
 
@@ -30,17 +30,6 @@ db.getConnection((err) => {
     console.error("Error connecting to MySQL:", err.message);
   } else {
     console.log("Connected to MySQL database");
-  }
-});
-
-app.get("/users", async (res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM users");
-    res.status(200).json({ Users: rows, status: "success", code: "200" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Internal server error", status: "fail", code: "500" });
   }
 });
 

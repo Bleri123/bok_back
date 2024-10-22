@@ -1,7 +1,7 @@
 import db from "../db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {account_status_util} from "../utils/account_status_util.js";
+import { account_status_util } from "../utils/account_status_util.js";
 
 export const register = async (req, res) => {
   const {
@@ -68,7 +68,6 @@ export const register = async (req, res) => {
       ],
       (err, results) => {
         if (err) {
-          console.error("error saving the user", err.message);
           res.status(500).json({ error: "Database error during user insert" });
         }
 
@@ -82,10 +81,6 @@ export const register = async (req, res) => {
           [user_id, city, zip_code],
           (address_err, address_results) => {
             if (address_err) {
-              console.error(
-                "error saving the user address",
-                address_err.message
-              );
               res
                 .status(500)
                 .json({ error: "Database error during user address insert" });
@@ -97,7 +92,6 @@ export const register = async (req, res) => {
       }
     );
   } catch (error) {
-    console.error("Error registering the user:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -113,7 +107,6 @@ export const login = (req, res) => {
 
   db.query(sql, [email], async (err, results) => {
     if (err) {
-      console.error("error fetching user:", err.message);
       return res.status(500).json({ error: "Database error" });
     }
 
@@ -123,7 +116,7 @@ export const login = (req, res) => {
 
     const user = results[0];
     const isActive = isUserActive(res, user);
-    if(isActive) {
+    if (isActive) {
       const isMatch = await bcrypt.compare(pin, user.pin);
       if (!isMatch) {
         return res.status(400).json({ error: "Invalid email or pin" });
@@ -134,7 +127,7 @@ export const login = (req, res) => {
           id: user.id,
           email: user.email,
           role_id: user.role_id,
-          account_status_id: user.account_status_id
+          account_status_id: user.account_status_id,
         },
         process.env.JWT_SECRET,
         {
@@ -142,16 +135,13 @@ export const login = (req, res) => {
         }
       );
 
-
-
       res.json({ token });
     }
   });
 };
 
-
 const isUserActive = (res, user) => {
-    if(user?.account_status_id ) {
-      return account_status_util(res, user.account_status_id)
-    }
-}
+  if (user?.account_status_id) {
+    return account_status_util(res, user.account_status_id);
+  }
+};
