@@ -33,6 +33,17 @@ db.getConnection((err) => {
   }
 });
 
+app.get("/users", async (res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM users");
+    res.status(200).json({ Users: rows, status: "success", code: "200" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Internal server error", status: "fail", code: "500" });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
