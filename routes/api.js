@@ -16,6 +16,7 @@ router.get("/users", authenticateToken, isActive, getAllUsers);
 router.get("/users/active-users", getActiveUsers);
 router.get("/accounts", fetchAccount);
 router.get("/transaction_types", getAlltransaction_types);
+
 // UPDATE
 router.put("/user/:id", authenticateToken, isAdmin, isActive, updateUserByID);
 export default router;
