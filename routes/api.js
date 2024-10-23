@@ -8,12 +8,13 @@ import {
 import authenticateToken from "../middlewares/authMiddleware.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
 import { isActive } from "../middlewares/isActive.js";
-import { fetchAccount } from "../controllers/accountController.js";
+import { fetchAccount, fetchAccountByUserId } from "../controllers/accountController.js";
 
 // Get all users
 router.get("/users", authenticateToken, isActive, getAllUsers);
 router.get("/users/active-users", getActiveUsers);
 router.get("/accounts", fetchAccount);
+router.get("/accounts/:user_id", fetchAccountByUserId);
 // UPDATE
 router.put("/user/:id", authenticateToken, isAdmin, isActive, updateUserByID);
 export default router;
