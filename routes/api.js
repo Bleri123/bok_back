@@ -1,9 +1,19 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const usersController = require("../controllers/usersController");
+import {
+  getActiveUsers,
+  getAllUsers,
+  updateUserByID,
+} from "../controllers/usersController.js";
+import authenticateToken from "../middlewares/authMiddleware.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
+import { isActive } from "../middlewares/isActive.js";
+import { fetchAccount } from "../controllers/accountController.js";
 
 // Get all users
-router.get("/users", usersController.getAllUsers);
-router.get("/users/active-users", usersController.getActiveUsers);
-
-module.exports = router;
+router.get("/users", authenticateToken, isActive, getAllUsers);
+router.get("/users/active-users", getActiveUsers);
+router.get("/accounts", fetchAccount);
+// UPDATE
+router.put("/user/:id", authenticateToken, isAdmin, isActive, updateUserByID);
+export default router;
