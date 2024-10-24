@@ -1,10 +1,4 @@
-
 import db from '../db.js';
-
-export const fetchAccount = () => {
-  // qitu ka me punu talati
-  //   talat
-};
 
 export const deleteAccount = async (req, res) => {
   const id = req.params.id;
