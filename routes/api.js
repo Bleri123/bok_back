@@ -16,7 +16,7 @@ import { deleteAccount } from '../controllers/accountController.js';
 // Get all users
 router.get("/users", authenticateToken, isActive, getAllUsers);
 router.get("/users/active-users", getActiveUsers);
-router.get("/accounts", fetchAccount);
+router.get('/accounts', authenticateToken, fetchAccount);
 router.get("/accounts/:user_id", fetchAccountByUserId);
 router.get( "/account_types", getallaccount_types); 
 router.get("/transaction_types", getAlltransaction_types);
