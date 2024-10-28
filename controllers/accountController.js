@@ -48,7 +48,9 @@ export const deleteAccount = async (req, res) => {
 };
 
 export const fetchAccount = (req,res) => {
-  const sql = "SELECT * FROM accounts";
+  const user_id = req.user.id;
+  console.log(user_id);
+  const sql = `SELECT * FROM accounts WHERE user_id = ${user_id}`;
   db.query(sql, (err, results) => {
     if (err) {
       return res.status(500).json({ error: "Database query error" });
