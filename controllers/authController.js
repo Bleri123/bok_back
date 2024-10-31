@@ -135,7 +135,7 @@ export const login = (req, res) => {
         }
       );
 
-      res.json({ token });
+      res.json({ token, isAdmin: user.role_id === 1 });
     }
   });
 };
