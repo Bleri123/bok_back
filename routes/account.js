@@ -1,6 +1,6 @@
 import authenticateToken from "../middlewares/authMiddleware.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
-import { fetchAccount, fetchAccountByUserId, getallaccount_types } from "../controllers/accountController.js";
+import { fetchAccount, fetchAccountByUserId } from "../controllers/accountController.js";
 import { deleteAccount } from '../controllers/accountController.js';
 import express from 'express';
 const router = express.Router();
