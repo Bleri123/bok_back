@@ -5,7 +5,7 @@ export const getTransactionHistory = async (req, res) => {
   const { email } = req.user;
   const id = await getUserId(email);
   const query =
-    'SELECT t.amount, at.role, tf.fixed_fee FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id WHERE at.account_id = ?'; 
+    'SELECT t.amount, tt.name, tf.fixed_fee, t.id FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ?'; 
 
   try{
     const accountTransactionInfo = await new Promise((resolve, reject) => {
