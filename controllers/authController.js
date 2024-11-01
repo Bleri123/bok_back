@@ -140,6 +140,7 @@ export const login = (req, res) => {
   });
 };
 
+
 const isUserActive = (res, user) => {
   if (user?.account_status_id) {
     return account_status_util(res, user.account_status_id);

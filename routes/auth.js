@@ -7,12 +7,10 @@ const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
-
-router.get("/protected", authenticateToken, isActive,isAdmin, (req, res) => {
-  res.json({
-    message: "You have access to this protected route",
-    user: req.user,
-  });
+router.get('/isAdmin', authenticateToken, isAdmin, (req, res) => {
+  res.status(200).json({
+    isAdmin: true
+  })
 });
 
 export default router;
