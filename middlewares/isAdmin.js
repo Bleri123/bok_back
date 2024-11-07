@@ -1,7 +1,4 @@
-// function
-
 export const isAdmin = (req, res, next) => {
-
     if(req.user.role_id === 1) {
         next();
     }

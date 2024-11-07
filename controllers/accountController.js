@@ -1,40 +1,15 @@
-import db from '../db.js';
+import queries from '../db/queries.js';
 
 export const deleteAccount = async (req, res) => {
   const id = req.params.id;
 
   try {
-    async function accountExists() {
-      return await new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM accounts WHERE id = ?';
-        db.query(sql, [id], (err, results) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(results.length > 0);
-        });
-      });
-    }
-
-    const exists = await accountExists();
+    const exists = await queries.accountExists(id);
     if(!exists){
       return res.status(400).json({ error: 'Account does not exist' });
-    }
+    }    
 
-    async function deleteAccount(){
-      return await new Promise((resolve, reject) => {
-        const sql = 'DELETE FROM accounts WHERE id = ?';
-        db.query(sql, [id], (err, results) => {
-          if (err) {
-            reject(err);
-          }
-         
-          resolve(results?.affectedRows > 0);
-        });
-      });
-    }
-
-    const deleteAcc = await deleteAccount();
+    const deleteAcc = await queries.deleteAccount(id);
 
     // couldn't be deleted successfuly
     if (!deleteAcc) {
@@ -47,25 +22,23 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
-export const fetchAccount = (req,res) => {
+export const fetchAccount = async (req,res) => {
   const user_id = req.user.id;
-  const sql = `SELECT * FROM accounts WHERE user_id = ${user_id}`;
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Database query error" });
-    }
-    res.json(results);
-  });
+  try{
+    const account = await queries.getAccountByUserId(user_id);
+    res.send(account);
+  }catch(e){
+    res.status(500).json('Internal server error');
+  }
 };
 
-export const fetchAccountByUserId = (req, res) => {
+export const fetchAccountByUserId = async (req, res) => {
   const user_id = req.params.user_id
-  const sql = "SELECT * FROM accounts WHERE user_id = ?";
-  db.query(sql,[user_id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Database query error" });
-    }
-    res.json(results);
-  });
+  try{
+    const result = await queries.getAccountByUserId(user_id);
+    res.send(result);
+  }catch(e){
+    res.status(500).json('Internal server error');
+  }
 };
 
