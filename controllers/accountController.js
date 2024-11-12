@@ -44,7 +44,7 @@ export const fetchAccountByUserId = async (req, res) => {
 
 export const getAccountsReports = async (req, res) => {
   const user_id = req.user.id;
-  const {since_date} = req.body;
+  const {since_date} = req.query;
   try{
     const reports = await queries.getAccountTransactionSinceDate(
       user_id,
