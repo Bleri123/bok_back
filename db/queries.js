@@ -243,6 +243,21 @@ export async function insertUserAddress(user_id, city, zip_code) {
   });
 }
 
+export async function getAccountTransactionSinceDate(id, sinceDate){
+  console.log({sinceDate});
+  const query =
+    'SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?';
+
+  return await new Promise((resolve, reject) => {
+    db.query(query, [id, sinceDate], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });  
+}
+
 export default {
   getUserId,
   accountExists,
@@ -255,4 +270,5 @@ export default {
   userExistsByEmail,
   getUserByEmail,
   insertUser,
+  getAccountTransactionSinceDate,
 };
