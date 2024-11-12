@@ -42,3 +42,16 @@ export const fetchAccountByUserId = async (req, res) => {
   }
 };
 
+export const getAccountsReports = async (req, res) => {
+  const user_id = req.user.id;
+  const {since_date} = req.body;
+  try{
+    const reports = await queries.getAccountTransactionSinceDate(
+      user_id,
+      since_date
+    );
+    res.send(reports);
+  }catch(e){
+    res.status(500).json('Internal server error')
+  }
+}
