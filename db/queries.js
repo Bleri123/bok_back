@@ -44,7 +44,7 @@ async function deleteAccount(id) {
 async function getAccountByUserId(user_id) {
   return await new Promise((resolve, reject) => {
     const sql = `SELECT a.id as 'account_id', u.first_name, u.last_name, u.email,  a.account_number, a.balance,
-        acs.name as "status_name", act.type  FROM accounts a
+        acs.name as "status_name", act.type, act.id as account_type_id  FROM accounts a
         inner join users u on u.id = a.user_id
               inner join account_status acs on acs.id = a.account_status_id
               inner join account_types act on act.id = a.account_type_id
@@ -245,10 +245,95 @@ export async function insertUserAddress(user_id, city, zip_code) {
 
 export async function getAccountTransactionSinceDate(id, sinceDate) {
   const query =
-    'SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?';
+    "SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?";
 
   return await new Promise((resolve, reject) => {
     db.query(query, [id, sinceDate], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function checkIfUserHasDebitAccount(user_id) {
+  return await new Promise((resolve, reject) => {
+    const sql = `SELECT count(*) as count FROM account_types at LEFT JOIN accounts a ON at.id = a.account_type_id WHERE at.id = 1 AND a.user_id = ?;`;
+    db.query(sql, [user_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function getUserBalance(user_id, account_type_id) {
+  return await new Promise((resolve, reject) => {
+    const sql = `SELECT id, user_id, balance FROM accounts where account_type_id = ? and user_id = ?`;
+    db.query(sql, [account_type_id, user_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function getTransactionFee(transaction_type_id) {
+  return await new Promise((resolve, reject) => {
+    const sql = `SELECT * FROM transaction_fees where transaction_type_id = ?`;
+    db.query(sql, [transaction_type_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function createNewTransaction(
+  transaction_type_id,
+  transaction_fee_id,
+  amount,
+  transaction_date = new Date().toISOString().slice(0, 19).replace("T", " ")
+) {
+  return await new Promise((resolve, reject) => {
+    const sql = `INSERT INTO transactions (transaction_type_id,transaction_fee_id,amount,transaction_date) VALUE (?,?,?,?) `;
+    db.query(
+      sql,
+      [transaction_type_id, transaction_fee_id, amount, transaction_date],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results);
+      }
+    );
+  });
+}
+
+export async function reduceBalance(new_balance, user_id, account_type_id) {
+  return await new Promise((resolve, reject) => {
+    const sql = `UPDATE accounts set balance = ? where user_id = ? and account_type_id = ?`;
+    db.query(sql, [new_balance, user_id, account_type_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function createAccountTransaction(
+  account_id,
+  transaction_id,
+  role
+) {
+  return await new Promise((resolve, reject) => {
+    const sql = `INSERT INTO account_transactions (account_id, transaction_id, role) VALUES (?,?,?)`;
+    db.query(sql, [account_id, transaction_id, role], (err, results) => {
       if (err) {
         return reject(err);
       }
@@ -282,5 +367,11 @@ export default {
   getUserByEmail,
   insertUser,
   getAccountTransactionSinceDate,
+  checkIfUserHasDebitAccount,
+  getUserBalance,
+  getTransactionFee,
+  createNewTransaction,
+  reduceBalance,
+  createAccountTransaction,
   addBalanceToAccount,
 };
