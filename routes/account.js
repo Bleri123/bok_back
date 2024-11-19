@@ -7,6 +7,8 @@ import express from 'express';
 const router = express.Router();
 
 router.get("/", authenticateToken, fetchAccount);
+router.get('/reports', authenticateToken, getAccountsReports)
+router.delete('/delete/:id', authenticateToken, isAdmin, deleteAccount);
 router.get(
   "/:user_id",
   authenticateToken,
@@ -14,7 +16,5 @@ router.get(
   isAdmin,
   fetchAccountByUserId
 );
-router.get('/reports', authenticateToken, getAccountsReports)
-router.delete('/delete/:id', authenticateToken, isAdmin, deleteAccount);
 
 export default router;

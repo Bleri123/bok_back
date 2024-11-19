@@ -1,7 +1,7 @@
-import db from "./db.js";
+import db from './db.js';
 
 const getUserId = async (email) => {
-  const query = "SELECT id FROM users WHERE email = ?";
+  const query = 'SELECT id FROM users WHERE email = ?';
 
   const userId = await new Promise((resolve, reject) => {
     db.query(query, [email], (err, result) => {
@@ -18,7 +18,7 @@ const getUserId = async (email) => {
 
 async function accountExists(id) {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM accounts WHERE id = ?";
+    const sql = 'SELECT * FROM accounts WHERE id = ?';
     db.query(sql, [id], (err, results) => {
       if (err) {
         return reject(err);
@@ -30,7 +30,7 @@ async function accountExists(id) {
 
 async function deleteAccount(id) {
   return await new Promise((resolve, reject) => {
-    const sql = "DELETE FROM accounts WHERE id = ?";
+    const sql = 'DELETE FROM accounts WHERE id = ?';
     db.query(sql, [id], (err, results) => {
       if (err) {
         return reject(err);
@@ -89,7 +89,7 @@ async function getAllUsers() {
 
 async function getActiveUsers() {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM users WHERE account_status_id = 1";
+    const sql = 'SELECT * FROM users WHERE account_status_id = 1';
     db.query(sql, (err, results) => {
       if (err) {
         return reject(err);
@@ -158,7 +158,7 @@ async function updateUserAddress(city, zip_code, id) {
 
 async function getTransactionHistory(id) {
   const query =
-    "SELECT t.amount, tt.name, tf.fixed_fee, t.id FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ?";
+    'SELECT t.amount, tt.name, tf.fixed_fee, t.id FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ?';
 
   return await new Promise((resolve, reject) => {
     db.query(query, [id], (err, results) => {
@@ -179,7 +179,7 @@ export async function userExistsByEmail(email) {
 
 export async function getUserByEmail(email) {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM users WHERE email = ?";
+    const sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [email], (err, results) => {
       if (err) {
         return reject(err);
@@ -201,7 +201,7 @@ export async function insertUser(
   zip_code
 ) {
   const userSql =
-    "INSERT INTO users (first_name, last_name, email, pin, role_id, account_status_id, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    'INSERT INTO users (first_name, last_name, email, pin, role_id, account_status_id, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
   return new Promise((resolve, reject) => {
     db.query(
@@ -230,7 +230,7 @@ export async function insertUser(
 
 export async function insertUserAddress(user_id, city, zip_code) {
   const addressSql =
-    "Insert into user_address (user_id, city, zip_code) VALUES (?,?,?)";
+    'Insert into user_address (user_id, city, zip_code) VALUES (?,?,?)';
 
   return new Promise((resolve, reject) => {
     db.query(addressSql, [user_id, city, zip_code], (err, result) => {
@@ -243,7 +243,7 @@ export async function insertUserAddress(user_id, city, zip_code) {
   });
 }
 
-export async function getAccountTransactionSinceDate(id, sinceDate){
+export async function getAccountTransactionSinceDate(id, sinceDate) {
   const query =
     'SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?';
 
@@ -254,7 +254,19 @@ export async function getAccountTransactionSinceDate(id, sinceDate){
       }
       resolve(results);
     });
-  });  
+  });
+}
+
+export async function addBalanceToAccount(account_id, amount) {
+  const query = 'UPDATE accounts SET balance = balance + ? WHERE id = ?';
+  return new Promise((resolve, reject) => {
+    db.query(query, [amount, account_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
 }
 
 export default {
@@ -270,4 +282,5 @@ export default {
   getUserByEmail,
   insertUser,
   getAccountTransactionSinceDate,
+  addBalanceToAccount,
 };
