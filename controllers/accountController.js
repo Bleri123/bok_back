@@ -54,8 +54,8 @@ export const fetchLoggedUserAccount = async (req, res) => {
 
 export const getAccountsReports = async (req, res) => {
   const user_id = req.user.id;
-  const {since_date} = req.query;
-  try{
+  const { since_date } = req.query;
+  try {
     const reports = await queries.getAccountTransactionSinceDate(
       user_id,
       since_date
@@ -85,107 +85,6 @@ export const checkIfUserHasDebitAccount = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
-
-// export const userWithdrawMoney = async (req, res) => {
-//   const user_id = req?.user?.id;
-
-//   const chosen_value = req?.body?.chosen_value;
-//   const account_type_id = 1;
-//   const transaction_type_id = 2;
-//   const transaction_fee_id = 2;
-
-//   try {
-//     queries
-//       .getUserBalance(user_id, account_type_id)
-//       .then((userAccountData) => {
-//         if (userAccountData.length > 0) {
-//           console.log(userAccountData[0]?.balance);
-
-//           let balance = parseFloat(userAccountData[0]?.balance);
-//           let user_account_id = userAccountData[0]?.id;
-//           queries
-//             .getTransactionFee(transaction_type_id)
-//             .then((transactionFeeData) => {
-//               console.log("transactionFeeData", transactionFeeData);
-//               if (transactionFeeData.length > 0) {
-//                 let transfer_fee = transactionFeeData[0]?.fixed_fee;
-//                 console.log("transfer_fee", transfer_fee);
-
-//                 let total_with_transfer_fee =
-//                   parseFloat(chosen_value) + parseFloat(transfer_fee);
-
-//                 console.log("total_with_transfer_fee", total_with_transfer_fee);
-
-//                 if (total_with_transfer_fee > balance) {
-//                   return res
-//                     .status(400)
-//                     .json("Insufficient funds for the transaction");
-//                 }
-//                 // Withdraw process begin
-
-//                 queries
-//                   .createNewTransaction(
-//                     transaction_type_id,
-//                     transaction_fee_id,
-//                     total_with_transfer_fee
-//                   )
-//                   .then((response) => {
-//                     console.log("response", response?.insertId);
-//                     const new_transaction_id = response?.insertId;
-//                     const new_balance =
-//                       parseFloat(balance) - parseFloat(total_with_transfer_fee);
-//                     queries
-//                       .reduceBalance(new_balance, user_id, account_type_id)
-//                       .then((response) => {
-//                         queries
-//                           .createAccountTransaction(
-//                             user_account_id,
-//                             new_transaction_id,
-//                             "WITHDRAW"
-//                           )
-//                           .then((response) => {
-//                             res.status(200).json({
-//                               message:
-//                                 "Your withdrawal has been processed successfully.",
-//                             });
-//                           })
-//                           .catch((e) => {
-//                             console.log("e", e);
-//                             res
-//                               .status(500)
-//                               .json("Failed to create account transaction row");
-//                           });
-//                       })
-//                       .catch((e) => {
-//                         console.log("e", e);
-//                         res.status(500).json("Reduce balance failed");
-//                       });
-//                   })
-//                   .catch((e) => {
-//                     console.log("e", e);
-//                     res.status(500).json("Create new transaction failed");
-//                   });
-//               }
-//             })
-//             .catch((error) => {
-//               console.log("Error fetching transaction fee:", error);
-//             });
-//         } else {
-//           res
-//             .status(500)
-//             .json("User must have debit account to withdraw money");
-//         }
-//       })
-//       .catch((error) => {
-//         console.log("Error fetching user balance:", error);
-//       });
-
-//     // res.send(chosen_value);
-//   } catch (e) {
-//     console.log("error:", e);
-//     res.status(500).json("Internal server error");
-//   }
-// };
 
 export const userWithdrawMoney = async (req, res) => {
   const user_id = req?.user?.id;
@@ -253,5 +152,17 @@ export const userWithdrawMoney = async (req, res) => {
   } catch (error) {
     console.error("Error processing withdrawal:", error);
     return res.status(500).json("Internal server error");
+  }
+};
+
+export const getAccountInformation = async (req, res) => {
+  const user_id = req.user?.id;
+  const account_id = req.params.account_id;
+
+  try {
+    const result = await queries.getAccountInformation(user_id, account_id);
+    res.send(result);
+  } catch (e) {
+    res.status(500).json("Internal server error");
   }
 };
