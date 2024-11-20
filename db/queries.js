@@ -157,8 +157,21 @@ async function updateUserAddress(city, zip_code, id) {
 }
 
 async function getTransactionHistory(id) {
-  const query =
-    "SELECT t.amount, tt.name, tf.fixed_fee, t.id FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ?";
+  const query = `
+    SELECT 
+        t.amount, tt.name, tf.fixed_fee, t.id
+      FROM
+        account_transactions at
+          INNER JOIN
+        transactions t ON at.transaction_id = t.id
+          INNER JOIN
+        transaction_fees tf ON t.transaction_fee_id = tf.id
+          INNER JOIN
+        transaction_types tt ON t.transaction_type_id = tt.id
+          INNER JOIN
+          accounts a ON a.id = at.account_id
+        WHERE a.user_id = ?;
+    `;
 
   return await new Promise((resolve, reject) => {
     db.query(query, [id], (err, results) => {
