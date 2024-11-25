@@ -10,8 +10,9 @@ export const register = async (req, res) => {
     email,
     pin,
     role_id,
-    account_status_id,
     phone_number,
+    account_status_id,
+    account_type_id,
     city,
     zip_code,
   } = req.body;
@@ -22,8 +23,9 @@ export const register = async (req, res) => {
     !email ||
     !pin ||
     !role_id ||
-    !account_status_id ||
     !phone_number ||
+    !account_status_id ||
+    !account_type_id ||
     !city ||
     !zip_code
   ) {
@@ -47,8 +49,9 @@ export const register = async (req, res) => {
       email,
       hashedPin,
       role_id,
-      account_status_id,
       phone_number,
+      account_status_id,
+      account_type_id,
       city,
       zip_code
     );
@@ -100,10 +103,7 @@ export const login = async (req, res) => {
           role_id: user.role_id,
           account_status_id: user.account_status_id,
         },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "24h",
-        }
+        process.env.JWT_SECRET
       );
 
       res.json({ token, isAdmin: user.role_id === 1 });

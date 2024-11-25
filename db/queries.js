@@ -208,13 +208,14 @@ export async function insertUser(
   email,
   hashedPin,
   role_id,
-  account_status_id,
   phone_number,
+  account_status_id,
+  account_type_id,
   city,
   zip_code
 ) {
   const userSql =
-    "INSERT INTO users (first_name, last_name, email, pin, role_id, account_status_id, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO users (first_name, last_name, email, pin, role_id, phone_number, account_status_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   return new Promise((resolve, reject) => {
     db.query(
@@ -225,8 +226,8 @@ export async function insertUser(
         email,
         hashedPin,
         role_id,
-        account_status_id,
         phone_number,
+        account_status_id,
       ],
       async (err, results) => {
         if (err) {
@@ -235,6 +236,7 @@ export async function insertUser(
 
         const user_id = results.insertId;
         await insertUserAddress(user_id, city, zip_code);
+        await insertUserAccount(user_id, account_type_id);
         resolve(user_id);
       }
     );
@@ -251,6 +253,20 @@ export async function insertUserAddress(user_id, city, zip_code) {
         reject(err);
       }
 
+      resolve(result);
+    });
+  });
+}
+
+export async function insertUserAccount(user_id, account_type_id) {
+  const accountSql =
+    "Insert into accounts(user_id, account_type_id) VALUES (?,?)";
+
+  return new Promise((resolve, reject) => {
+    db.query(accountSql, [user_id, account_type_id], (err, result) => {
+      if (err) {
+        reject(err);
+      }
       resolve(result);
     });
   });
@@ -393,6 +409,20 @@ export async function getAccountInformation(user_id, account_id) {
   });
 }
 
+const getAccountTypes = async () => {
+  const query = "SELECT * FROM account_types";
+
+  return await new Promise((resolve, reject) => {
+    db.query(query, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
 export default {
   getUserId,
   accountExists,
@@ -414,4 +444,5 @@ export default {
   createAccountTransaction,
   addBalanceToAccount,
   getAccountInformation,
+  getAccountTypes,
 };

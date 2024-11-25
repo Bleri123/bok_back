@@ -9,6 +9,7 @@ import {
   getAccountInformation,
   getAccountsReports,
   userWithdrawMoney,
+  getAccountTypes,
 } from "../controllers/accountController.js";
 import { deleteAccount } from "../controllers/accountController.js";
 import express from "express";
@@ -35,4 +36,5 @@ router.get(
   authenticateToken,
   getAccountInformation
 );
+router.get("/types/account", authenticateToken, isActive, getAccountTypes);
 export default router;
