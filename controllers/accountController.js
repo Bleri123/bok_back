@@ -166,3 +166,12 @@ export const getAccountInformation = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const getAccountTypes = async (req, res) => {
+  try {
+    const result = await queries.getAccountTypes();
+    res.send(result);
+  } catch (e) {
+    res.status(500).json("Internal server error");
+  }
+};
