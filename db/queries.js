@@ -423,6 +423,34 @@ const getAccountTypes = async () => {
   });
 };
 
+const getUserAccountStatuses = async () => {
+  const query = "SELECT * FROM user_account_status";
+
+  return await new Promise((resolve, reject) => {
+    db.query(query, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
+const getUserRoles = async () => {
+  const query = "SELECT * FROM roles";
+
+  return await new Promise((resolve, reject) => {
+    db.query(query, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
 export default {
   getUserId,
   accountExists,
@@ -445,4 +473,6 @@ export default {
   addBalanceToAccount,
   getAccountInformation,
   getAccountTypes,
+  getUserAccountStatuses,
+  getUserRoles,
 };
