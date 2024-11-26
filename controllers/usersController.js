@@ -1,4 +1,4 @@
-import queries from '../db/queries.js';
+import queries from "../db/queries.js";
 
 // Get all users
 export const getAllUsers = async (req, res) => {
@@ -6,7 +6,7 @@ export const getAllUsers = async (req, res) => {
     const result = await queries.getAllUsers();
     res.status(200).json(result);
   } catch (e) {
-    res.status(500).json('Internal server error');
+    res.status(500).json("Internal server error");
   }
 };
 
@@ -15,7 +15,7 @@ export const getActiveUsers = async (req, res) => {
     const result = await queries.getActiveUsers();
     res.status(200).json(result);
   } catch (e) {
-    res.status(500).json('Internal server error');
+    res.status(500).json("Internal server error");
   }
 };
 
@@ -43,7 +43,7 @@ export const updateUserByID = async (req, res) => {
     !city ||
     !zip_code
   ) {
-    return res.status(400).json({ error: 'All fields are required' });
+    return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
@@ -68,12 +68,30 @@ export const updateUserByID = async (req, res) => {
     );
 
     res.status(200).json({
-      message: 'User update successfully',
-      status: 'success',
+      message: "User update successfully",
+      status: "success",
       data: [],
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getUserAccountStatuses = async (req, res) => {
+  try {
+    const result = await queries.getUserAccountStatuses();
+    res.status(200).json(result);
+  } catch (e) {
+    res.status(500).json("Internal server error", e);
+  }
+};
+
+export const getUserRoles = async (req, res) => {
+  try {
+    const result = await queries.getUserRoles();
+    res.status(200).json(result);
+  } catch (e) {
+    res.status(500).json("Internal server error", e);
   }
 };
