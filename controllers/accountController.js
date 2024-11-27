@@ -175,3 +175,13 @@ export const getAccountTypes = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const getAllAcountsForUser = async (req, res) => {
+  try{
+    const {userId} = req.query;
+    const accounts = await queries.getAllAccounts(userId);
+    res.json(accounts);
+  }catch(e){
+    res.status(500).json("Internal server error");
+  }
+}

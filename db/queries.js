@@ -1,7 +1,7 @@
-import db from "./db.js";
+import db from './db.js';
 
 const getUserId = async (email) => {
-  const query = "SELECT id FROM users WHERE email = ?";
+  const query = 'SELECT id FROM users WHERE email = ?';
 
   const userId = await new Promise((resolve, reject) => {
     db.query(query, [email], (err, result) => {
@@ -18,7 +18,7 @@ const getUserId = async (email) => {
 
 async function accountExists(id) {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM accounts WHERE id = ?";
+    const sql = 'SELECT * FROM accounts WHERE id = ?';
     db.query(sql, [id], (err, results) => {
       if (err) {
         return reject(err);
@@ -30,7 +30,7 @@ async function accountExists(id) {
 
 async function deleteAccount(id) {
   return await new Promise((resolve, reject) => {
-    const sql = "DELETE FROM accounts WHERE id = ?";
+    const sql = 'DELETE FROM accounts WHERE id = ?';
     db.query(sql, [id], (err, results) => {
       if (err) {
         return reject(err);
@@ -89,7 +89,7 @@ async function getAllUsers() {
 
 async function getActiveUsers() {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM users WHERE account_status_id = 1";
+    const sql = 'SELECT * FROM users WHERE account_status_id = 1';
     db.query(sql, (err, results) => {
       if (err) {
         return reject(err);
@@ -192,7 +192,7 @@ export async function userExistsByEmail(email) {
 
 export async function getUserByEmail(email) {
   return await new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM users WHERE email = ?";
+    const sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [email], (err, results) => {
       if (err) {
         return reject(err);
@@ -215,7 +215,7 @@ export async function insertUser(
   zip_code
 ) {
   const userSql =
-    "INSERT INTO users (first_name, last_name, email, pin, role_id, phone_number, account_status_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    'INSERT INTO users (first_name, last_name, email, pin, role_id, phone_number, account_status_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
   return new Promise((resolve, reject) => {
     db.query(
@@ -245,7 +245,7 @@ export async function insertUser(
 
 export async function insertUserAddress(user_id, city, zip_code) {
   const addressSql =
-    "Insert into user_address (user_id, city, zip_code) VALUES (?,?,?)";
+    'Insert into user_address (user_id, city, zip_code) VALUES (?,?,?)';
 
   return new Promise((resolve, reject) => {
     db.query(addressSql, [user_id, city, zip_code], (err, result) => {
@@ -260,7 +260,7 @@ export async function insertUserAddress(user_id, city, zip_code) {
 
 export async function insertUserAccount(user_id, account_type_id) {
   const accountSql =
-    "Insert into accounts(user_id, account_type_id) VALUES (?,?)";
+    'Insert into accounts(user_id, account_type_id) VALUES (?,?)';
 
   return new Promise((resolve, reject) => {
     db.query(accountSql, [user_id, account_type_id], (err, result) => {
@@ -274,7 +274,7 @@ export async function insertUserAccount(user_id, account_type_id) {
 
 export async function getAccountTransactionSinceDate(id, sinceDate) {
   const query =
-    "SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?";
+    'SELECT t.amount, tt.name, tf.fixed_fee, t.id, at.created_at FROM account_transactions at INNER JOIN transactions t ON at.transaction_id = t.id INNER JOIN transaction_fees tf ON t.transaction_fee_id = tf.id INNER JOIN transaction_types tt ON t.transaction_type_id = tt.id WHERE at.account_id = ? AND at.created_at > ?';
   return await new Promise((resolve, reject) => {
     db.query(query, [id, sinceDate], (err, results) => {
       if (err) {
@@ -325,7 +325,7 @@ export async function createNewTransaction(
   transaction_type_id,
   transaction_fee_id,
   amount,
-  transaction_date = new Date().toISOString().slice(0, 19).replace("T", " ")
+  transaction_date = new Date().toISOString().slice(0, 19).replace('T', ' ')
 ) {
   return await new Promise((resolve, reject) => {
     const sql = `INSERT INTO transactions (transaction_type_id,transaction_fee_id,amount,transaction_date) VALUE (?,?,?,?) `;
@@ -371,7 +371,7 @@ export async function createAccountTransaction(
 }
 
 export async function addBalanceToAccount(account_id, amount) {
-  const query = "UPDATE accounts SET balance = balance + ? WHERE id = ?";
+  const query = 'UPDATE accounts SET balance = balance + ? WHERE id = ?';
   return new Promise((resolve, reject) => {
     db.query(query, [amount, account_id], (err, results) => {
       if (err) {
@@ -410,7 +410,7 @@ export async function getAccountInformation(user_id, account_id) {
 }
 
 const getAccountTypes = async () => {
-  const query = "SELECT * FROM account_types";
+  const query = 'SELECT * FROM account_types';
 
   return await new Promise((resolve, reject) => {
     db.query(query, (err, result) => {
@@ -424,7 +424,7 @@ const getAccountTypes = async () => {
 };
 
 const getUserAccountStatuses = async () => {
-  const query = "SELECT * FROM user_account_status";
+  const query = 'SELECT * FROM user_account_status';
 
   return await new Promise((resolve, reject) => {
     db.query(query, (err, result) => {
@@ -438,11 +438,40 @@ const getUserAccountStatuses = async () => {
 };
 
 const getUserRoles = async () => {
-  const query = "SELECT * FROM roles";
+  const query = 'SELECT * FROM roles';
 
   return await new Promise((resolve, reject) => {
     db.query(query, (err, result) => {
       if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
+const getAllAccounts = async (userId) => {
+  const query = `
+    SELECT 
+      a.account_number,
+      aas.name AS status,
+      at.type,
+      a.balance,
+      a.created_at
+    FROM
+      accounts a
+          INNER JOIN
+      account_status aas ON a.account_status_id = aas.id
+          INNER JOIN
+      account_types at ON a.account_type_id = at.id
+    WHERE
+      user_id = ?;
+  `;
+
+  return await new Promise((resolve, reject) => {
+    db.query(query, [userId], (err, result) => {
+      if(err){
         return reject(err);
       }
 
@@ -475,4 +504,5 @@ export default {
   getAccountTypes,
   getUserAccountStatuses,
   getUserRoles,
+  getAllAccounts
 };
