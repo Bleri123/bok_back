@@ -66,6 +66,7 @@ async function getAllUsers() {
           u.last_name,
           u.email,
           r.name AS 'role_name',
+          uas.name AS 'user_account_status',
           acs.name AS 'account_status',
           ua.city,
           ua.zip_code
@@ -73,10 +74,12 @@ async function getAllUsers() {
       users u
           INNER JOIN
       roles r ON u.role_id = r.id
-          INNER JOIN
+          LEFT OUTER JOIN
       account_status acs ON acs.id = u.account_status_id
           INNER JOIN
       user_address ua ON ua.user_id = u.id
+       	INNER JOIN
+      user_account_status uas ON uas.id = u.account_status_id 
       ORDER BY u.first_name, u.last_name;`;
     db.query(sql, (err, results) => {
       if (err) {
@@ -210,7 +213,7 @@ export async function insertUser(
   role_id,
   phone_number,
   account_status_id,
-  account_type_id,
+  account_types,
   city,
   zip_code
 ) {
@@ -236,7 +239,11 @@ export async function insertUser(
 
         const user_id = results.insertId;
         await insertUserAddress(user_id, city, zip_code);
-        await insertUserAccount(user_id, account_type_id);
+        // admin
+        if (role_id == 2) {
+          await insertUserAccounts(user_id, account_types);
+        }
+
         resolve(user_id);
       }
     );
@@ -258,19 +265,49 @@ export async function insertUserAddress(user_id, city, zip_code) {
   });
 }
 
-export async function insertUserAccount(user_id, account_type_id) {
-  const accountSql =
-    'Insert into accounts(user_id, account_type_id) VALUES (?,?)';
+export async function insertUserAccounts(user_id, account_types) {
+  const results = []; // Array to hold the results of each insertion
 
-  return new Promise((resolve, reject) => {
-    db.query(accountSql, [user_id, account_type_id], (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
+  for (const account_type_id of account_types) {
+    // Generate a unique 16-digit account number using timestamp and random numbers
+    const accountNumber = generateAccountNumber();
+
+    const accountSql =
+      "Insert into accounts(user_id, account_type_id, account_number, account_status_id, balance) VALUES (?,?,?,?,?)";
+
+    // Insert each account and push the result to the results array
+    const result = await new Promise((resolve, reject) => {
+      db.query(
+        accountSql,
+        [user_id, account_type_id, accountNumber, 1, 0],
+        (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        }
+      );
     });
-  });
+
+    results.push(result);
+  }
+
+  return results; // Return all results
 }
+
+// Function to generate a unique 16-digit account number
+const generateAccountNumber = () => {
+  // Get the current timestamp and convert it to a string
+  const timestamp = Date.now().toString();
+
+  // Generate a random number and concatenate it with the timestamp
+  const randomPart = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, "0"); // 4-digit random number
+  const accountNumber = (timestamp + randomPart).slice(-16); // Take the last 16 digits
+
+  return accountNumber;
+};
 
 export async function getAccountTransactionSinceDate(id, sinceDate) {
   const query =
