@@ -4,18 +4,18 @@ import { account_status_util } from "../utils/account_status_util.js";
 import queries from "../db/queries.js";
 
 export const register = async (req, res) => {
-  const {
-    first_name,
-    last_name,
-    email,
-    pin,
-    role_id,
-    phone_number,
-    account_status_id,
-    account_type_id,
-    city,
-    zip_code,
-  } = req.body;
+  const { email, pin, city } = req.body;
+
+  const first_name = req.body.firstName;
+  const last_name = req.body.lastName;
+  const role_id = req.body.roleId;
+  const phone_number = req.body.phoneNumber;
+  const account_status_id = req.body.status;
+  const account_types =
+    !req.body.account_types || req.body.account_types.length === 0
+      ? [1]
+      : req.body.account_types;
+  const zip_code = req.body.zipCode;
 
   if (
     !first_name ||
@@ -25,7 +25,7 @@ export const register = async (req, res) => {
     !role_id ||
     !phone_number ||
     !account_status_id ||
-    !account_type_id ||
+    !account_types ||
     !city ||
     !zip_code
   ) {
@@ -51,7 +51,7 @@ export const register = async (req, res) => {
       role_id,
       phone_number,
       account_status_id,
-      account_type_id,
+      account_types,
       city,
       zip_code
     );
