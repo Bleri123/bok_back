@@ -5,6 +5,8 @@ import {
   getUserAccountStatuses,
   getUserRoles,
   userStatusTableUpdateQuery,
+  userStatusTableGeneralUpdateQuery,
+  userUpdate,
 } from "../controllers/usersController.js";
 import authenticateToken from "../middlewares/authMiddleware.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
@@ -28,6 +30,13 @@ router.get(
   isActive,
   getUserAccountStatuses
 );
+router.put(
+  "/set/user/account/status/:id",
+  authenticateToken,
+  isAdmin,
+  isActive,
+  userStatusTableGeneralUpdateQuery
+);
 router.get("/user-roles", authenticateToken, isActive, getUserRoles);
 router.put(
   "/set/user/inactive/:id",
@@ -36,5 +45,6 @@ router.put(
   isActive,
   userStatusTableUpdateQuery
 );
+router.put("/:id/update", authenticateToken, isAdmin, isActive, userUpdate);
 
 export default router;

@@ -116,3 +116,62 @@ export const userStatusTableUpdateQuery = async (req, res) => {
     res.status(500).json({ error: "Internal server error", e });
   }
 };
+
+export const userStatusTableGeneralUpdateQuery = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user_account_status_id = req.body.user_account_status_id;
+    const result = await queries.handleUpdateUserStatus(
+      user_account_status_id,
+      id
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: `No user found with this id: ${id}` });
+    }
+
+    res
+      .status(200)
+      .json({ message: `User with id: ${id} updated successfully` });
+  } catch (e) {
+    res.status(500).json({ error: "Internal server error", e });
+  }
+};
+
+export const userUpdate = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    const phone_number = req.body.phone_number;
+    const city = req.body.city;
+    const zip_code = req.body.zip_code;
+    const email = req.body.email;
+
+    const user = await queries.getUserId(email);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: `No user found with this id: ${id}` });
+    }
+
+    const result = await queries.handleUpdateUser(
+      first_name,
+      last_name,
+      phone_number,
+      city,
+      zip_code,
+      id
+    );
+
+    res.status(200).json({
+      message: `User with id: ${id} updated successfully`,
+      result,
+      user,
+    });
+  } catch (e) {
+    res.status(500).json({ error: "Internal server error", e });
+  }
+};

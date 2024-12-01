@@ -65,6 +65,7 @@ async function getAllUsers() {
           u.first_name,
           u.last_name,
           u.email,
+          u.phone_number,
           r.name AS 'role_name',
           uas.name AS 'user_account_status',
           acs.name AS 'account_status',
@@ -530,6 +531,57 @@ const putUserInactive = async (id) => {
   });
 };
 
+const handleUpdateUserStatus = async (user_account_status_id, user_id) => {
+  const userStatusTableUpdateQuery = `UPDATE users SET account_status_id = ? WHERE id = ?`;
+
+  return await new Promise((resolve, reject) => {
+    db.query(
+      userStatusTableUpdateQuery,
+      [user_account_status_id, user_id],
+      (error, results) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(results);
+      }
+    );
+  });
+};
+
+const handleUpdateUser = async (
+  first_name,
+  last_name,
+  phone_number,
+  city,
+  zip_code,
+  id
+) => {
+  const userUpdateQuery = `UPDATE users SET first_name = ?, last_name = ?, phone_number = ? WHERE id = ?`;
+  const userAddressUpdateQuery = `UPDATE user_address SET city = ?, zip_code = ? WHERE user_id = ?`;
+
+  return await new Promise((resolve, reject) => {
+    db.query(
+      userUpdateQuery,
+      [first_name, last_name, phone_number, id],
+      async (error, results) => {
+        if (error) {
+          return reject(error);
+        }
+        db.query(
+          userAddressUpdateQuery,
+          [city, zip_code, id],
+          (error, addressResults) => {
+            if (error) {
+              return reject(error);
+            }
+            resolve(results);
+          }
+        );
+      }
+    );
+  });
+};
+
 export default {
   getUserId,
   accountExists,
@@ -556,4 +608,6 @@ export default {
   getUserRoles,
   getAllAccounts,
   putUserInactive,
+  handleUpdateUserStatus,
+  handleUpdateUser,
 };
