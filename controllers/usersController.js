@@ -95,3 +95,24 @@ export const getUserRoles = async (req, res) => {
     res.status(500).json("Internal server error", e);
   }
 };
+
+export const userStatusTableUpdateQuery = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = await queries.putUserInactive(id);
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: `No user found with this id: ${id}` });
+    }
+
+    res
+      .status(200)
+      .json({ message: `User with id: ${id} updated successfully` });
+  } catch (e) {
+    console.log("e", e);
+
+    res.status(500).json({ error: "Internal server error", e });
+  }
+};
