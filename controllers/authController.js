@@ -91,8 +91,6 @@ export const login = async (req, res) => {
     const isActive = isUserActive(res, user);
     if (!isActive) return;
 
-    console.log("a");
-
     const isMatch = await bcrypt.compare(pin, user.pin);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid email or pin" });
@@ -125,4 +123,34 @@ const isUserActive = (res, user) => {
     }
   }
   return true;
+};
+
+export const changeUserPin = async (req, res) => {
+  const { pin, user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ error: "Please provide user id field" });
+  }
+  if (!pin) {
+    return res.status(400).json({ error: "Pin field is required" });
+  }
+
+  const userExist = await queries.getUserById(user_id);
+
+  try {
+    if (!userExist) {
+      return res.status(400).json({ error: "This user does not exist" });
+    }
+
+    // creating the hash for the pin
+    const hashedPin = await bcrypt.hash(pin, 10);
+
+    const response = await queries.UpdateUserPin(hashedPin, user_id);
+
+    res.status(200).json({ message: "Pin updated successfully", response });
+  } catch (error) {
+    console.log("in here");
+    console.log(error);
+    res.status(500).json({ error: "Internal server error", error });
+  }
 };
