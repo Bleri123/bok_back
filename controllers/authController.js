@@ -89,25 +89,26 @@ export const login = async (req, res) => {
 
     const user = results[0];
     const isActive = isUserActive(res, user);
+    if (!isActive) return;
 
-    if (isActive) {
-      const isMatch = await bcrypt.compare(pin, user.pin);
-      if (!isMatch) {
-        return res.status(400).json({ error: "Invalid email or pin" });
-      }
+    console.log("a");
 
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-          role_id: user.role_id,
-          account_status_id: user.account_status_id,
-        },
-        process.env.JWT_SECRET
-      );
-
-      res.json({ token, isAdmin: user.role_id === 1 });
+    const isMatch = await bcrypt.compare(pin, user.pin);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid email or pin" });
     }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role_id: user.role_id,
+        account_status_id: user.account_status_id,
+      },
+      process.env.JWT_SECRET
+    );
+
+    res.json({ token, isAdmin: user.role_id === 1 });
   } catch (e) {
     console.log(e);
     return res.status(500).json({ error: "Internal server error" });
@@ -116,6 +117,12 @@ export const login = async (req, res) => {
 
 const isUserActive = (res, user) => {
   if (user?.account_status_id) {
-    return account_status_util(res, user.account_status_id);
+    const isActive = account_status_util(res, user.account_status_id);
+    if (isActive && isActive == true) {
+      return true;
+    } else {
+      return false;
+    }
   }
+  return true;
 };
