@@ -206,6 +206,31 @@ export async function getUserByEmail(email) {
   });
 }
 
+export async function getUserById(id) {
+  return await new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM users WHERE id = ?";
+    db.query(sql, [id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
+export async function UpdateUserPin(hashedPin, id) {
+  const changePinSql = "UPDATE users SET pin = ? where id = ?";
+
+  return new Promise((resolve, reject) => {
+    db.query(changePinSql, [hashedPin, id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
 export async function insertUser(
   first_name,
   last_name,
@@ -593,6 +618,8 @@ export default {
   getActiveUsers,
   userExistsByEmail,
   getUserByEmail,
+  getUserById,
+  UpdateUserPin,
   insertUser,
   getAccountTransactionSinceDate,
   checkIfUserHasDebitAccount,
