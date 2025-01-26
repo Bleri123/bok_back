@@ -177,11 +177,39 @@ export const getAccountTypes = async (req, res) => {
 };
 
 export const getAllAcountsForUser = async (req, res) => {
-  try{
-    const {userId} = req.query;
+  try {
+    const { userId } = req.query;
     const accounts = await queries.getAllAccounts(userId);
     res.json(accounts);
-  }catch(e){
+  } catch (e) {
     res.status(500).json("Internal server error");
   }
-}
+};
+
+export const addAccount = async (req, res) => {
+  try {
+    // Destructure required fields from the request body
+    const { user_id, account_type_id, account_status_id } = req.body;
+
+    // Optional: Validate the incoming data
+    if (!user_id || !account_type_id || !account_status_id) {
+      return res.status(400).json("Missing required fields");
+    }
+
+    // Call the query function to add the account
+    const result = await queries.addAccount({
+      user_id,
+      account_type_id,
+      account_status_id,
+    });
+
+    // Respond with success and the newly created account data
+    res.status(201).json({
+      message: "Account created successfully",
+      account: result,
+    });
+  } catch (e) {
+    console.error(e); // Logging the error might help in debugging
+    res.status(500).json("Internal server error");
+  }
+};
