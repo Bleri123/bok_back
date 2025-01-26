@@ -607,6 +607,34 @@ const handleUpdateUser = async (
   });
 };
 
+async function addAccount({ user_id, account_type_id, account_status_id }) {
+  let accountNumber = generateAccountNumber();
+
+  async function checkAndGenerateUniqueAccountNumber() {
+    const checkIfAccountNumberExists = `SELECT COUNT(*) FROM accounts WHERE account_number = ?`;
+
+    const [accountNumberBoolean] = await db
+      .promise()
+      .query(checkIfAccountNumberExists, [accountNumber]);
+
+    if (accountNumberBoolean[0].count > 0) {
+      accountNumber = generateAccountNumber();
+      await checkAndGenerateUniqueAccountNumber();
+    }
+  }
+
+  await checkAndGenerateUniqueAccountNumber(); // Initial call to check and generate unique account number
+
+  const sql = `
+    INSERT INTO accounts (user_id, account_type_id, account_status_id, account_number)
+    VALUES (?, ?, ?, ?)
+  `;
+  const [result] = await db
+    .promise()
+    .query(sql, [user_id, account_type_id, account_status_id, accountNumber]);
+  return result.insertId; // Return the ID of the newly created account
+}
+
 export default {
   getUserId,
   accountExists,
@@ -637,4 +665,5 @@ export default {
   putUserInactive,
   handleUpdateUserStatus,
   handleUpdateUser,
+  addAccount,
 };

@@ -1,5 +1,5 @@
 // db.js
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import mysql from "mysql2";
 dotenv.config();
 
