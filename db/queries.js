@@ -607,7 +607,7 @@ const handleUpdateUser = async (
   });
 };
 
-async function addAccount({ user_id, account_type_id, account_status_id }) {
+async function addAccount({ user_id, account_type_id }) {
   let accountNumber = generateAccountNumber();
 
   async function checkAndGenerateUniqueAccountNumber() {
@@ -626,14 +626,27 @@ async function addAccount({ user_id, account_type_id, account_status_id }) {
   await checkAndGenerateUniqueAccountNumber(); // Initial call to check and generate unique account number
 
   const sql = `
-    INSERT INTO accounts (user_id, account_type_id, account_status_id, account_number)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO accounts (user_id, account_type_id, account_number)
+    VALUES (?, ?, ?)
   `;
   const [result] = await db
     .promise()
-    .query(sql, [user_id, account_type_id, account_status_id, accountNumber]);
+    .query(sql, [user_id, account_type_id, accountNumber]);
   return result.insertId; // Return the ID of the newly created account
 }
+
+const getAccountStatuses = async () => {
+  const query = `SELECT * FROM account_status;`;
+  return await new Promise((resolve, reject) => {
+    db.query(query, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
 
 export default {
   getUserId,
@@ -666,4 +679,5 @@ export default {
   handleUpdateUserStatus,
   handleUpdateUser,
   addAccount,
+  getAccountStatuses,
 };
