@@ -12,6 +12,7 @@ import {
   getAccountTypes,
   getAllAcountsForUser,
   addAccount,
+  getAccountStatuses,
 } from "../controllers/accountController.js";
 import { deleteAccount } from "../controllers/accountController.js";
 import express from "express";
@@ -40,5 +41,11 @@ router.get(
   getAccountInformation
 );
 router.get("/types/account", authenticateToken, isActive, getAccountTypes);
-router.post("/add", authenticateToken, isActive, addAccount);
+router.post("/accountsss/add", addAccount);
+router.get(
+  "/statuses/account-statuses",
+  authenticateToken,
+  isActive,
+  getAccountStatuses
+);
 export default router;
