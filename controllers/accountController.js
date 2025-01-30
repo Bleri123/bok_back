@@ -221,3 +221,15 @@ export const getAccountStatuses = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const getMissingAccountTypes = async (req, res) => {
+  const user_id = req.params.user_id; // Assuming user_id is passed as a URL parameter
+  try {
+    const missingAccountTypes = await queries.getMissingAccountTypesForUser(
+      user_id
+    );
+    res.send(missingAccountTypes);
+  } catch (e) {
+    res.status(500).json("Internal server error");
+  }
+};

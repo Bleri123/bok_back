@@ -648,6 +648,24 @@ const getAccountStatuses = async () => {
   });
 };
 
+const getMissingAccountTypesForUser = (userId) => {
+  const query = `
+      SELECT at.*
+      FROM account_types at
+      LEFT JOIN accounts a ON at.id = a.account_type_id AND a.user_id = ?
+      WHERE a.id IS NULL;
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.query(query, [userId], (error, results) => {
+      if (error) {
+        return reject(error);
+      }
+      resolve(results);
+    });
+  });
+};
+
 export default {
   getUserId,
   accountExists,
@@ -680,4 +698,5 @@ export default {
   handleUpdateUser,
   addAccount,
   getAccountStatuses,
+  getMissingAccountTypesForUser,
 };
