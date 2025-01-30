@@ -233,3 +233,31 @@ export const getMissingAccountTypes = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const accountStatusUpdate = async (req, res) => {
+  console.log("Request Body:", req.body); // Log the incoming request body
+
+  const { account_id, account_status_id } = req.body; // Expecting account_id and account_status_id in the request body
+
+  try {
+    // Validate input
+    if (!account_id || !account_status_id) {
+      return res.status(400).json("Missing required fields");
+    }
+
+    // Call the query to update the account status
+    const result = await queries.updateAccountStatus(
+      account_status_id,
+      account_id
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json("Account not found or status unchanged");
+    }
+
+    res.status(200).json("Account status updated successfully");
+  } catch (error) {
+    console.error("Error updating account status:", error);
+    res.status(500).json("Internal server error");
+  }
+};
