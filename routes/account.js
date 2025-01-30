@@ -14,6 +14,7 @@ import {
   addAccount,
   getAccountStatuses,
   getMissingAccountTypes,
+  accountStatusUpdate,
 } from "../controllers/accountController.js";
 import { deleteAccount } from "../controllers/accountController.js";
 import express from "express";
@@ -53,5 +54,11 @@ router.get(
   "/user/missing-account-types/:user_id",
   authenticateToken,
   getMissingAccountTypes
+);
+router.post(
+  "/account/status/update",
+  authenticateToken,
+  isAdmin,
+  accountStatusUpdate
 );
 export default router;

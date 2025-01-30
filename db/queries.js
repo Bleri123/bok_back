@@ -519,6 +519,7 @@ const getAllAccounts = async (userId) => {
     SELECT 
       a.account_number,
       aas.name AS status,
+      a.account_status_id,
       at.type,
       a.balance,
       a.created_at
@@ -666,6 +667,19 @@ const getMissingAccountTypesForUser = (userId) => {
   });
 };
 
+async function updateAccountStatus(account_status_id, account_id) {
+  const sql = "UPDATE accounts SET account_status_id = ? WHERE id = ?";
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [account_status_id, account_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
 export default {
   getUserId,
   accountExists,
@@ -699,4 +713,5 @@ export default {
   addAccount,
   getAccountStatuses,
   getMissingAccountTypesForUser,
+  updateAccountStatus,
 };
