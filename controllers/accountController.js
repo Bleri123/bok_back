@@ -240,12 +240,10 @@ export const accountStatusUpdate = async (req, res) => {
   const { account_id, account_status_id } = req.body; // Expecting account_id and account_status_id in the request body
 
   try {
-    // Validate input
     if (!account_id || !account_status_id) {
       return res.status(400).json("Missing required fields");
     }
 
-    // Call the query to update the account status
     const result = await queries.updateAccountStatus(
       account_status_id,
       account_id
@@ -258,6 +256,22 @@ export const accountStatusUpdate = async (req, res) => {
     res.status(200).json("Account status updated successfully");
   } catch (error) {
     console.error("Error updating account status:", error);
+    res.status(500).json("Internal server error");
+  }
+};
+
+export const reportAccount = async (req, res) => {
+  const { user_id, filter } = req.query;
+  try {
+    if (!user_id || !filter) {
+      return res.status(400).json("Missing required fields");
+    }
+
+    const result = await queries.report(user_id, filter);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error generating report:", error);
     res.status(500).json("Internal server error");
   }
 };
