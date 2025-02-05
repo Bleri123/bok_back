@@ -516,7 +516,8 @@ const getUserRoles = async () => {
 
 const getAllAccounts = async (userId) => {
   const query = `
-    SELECT 
+    SELECT
+      a.id,
       a.account_number,
       aas.name AS status,
       a.account_status_id,
@@ -668,10 +669,49 @@ const getMissingAccountTypesForUser = (userId) => {
 };
 
 async function updateAccountStatus(account_status_id, account_id) {
-  const sql = "UPDATE accounts SET account_status_id = ? WHERE id = ?";
+  const sql =
+    "UPDATE accounts SET account_status_id = ? WHERE account_number = ?";
 
   return new Promise((resolve, reject) => {
     db.query(sql, [account_status_id, account_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+async function report(user_id, filter) {
+  let dateCondition = "";
+  switch (filter) {
+    case "7days":
+      dateCondition = "WHERE t.created_at >= NOW() - INTERVAL 7 DAY";
+      break;
+    case "14days":
+      dateCondition = "WHERE t.created_at >= NOW() - INTERVAL 14 DAY";
+      break;
+    case "1month":
+      dateCondition = "WHERE t.created_at >= NOW() - INTERVAL 1 MONTH";
+      break;
+    default:
+      dateCondition = "";
+  }
+
+  const sql = `
+    SELECT u.id as user_id, u.first_name, u.last_name, a.account_number, atr.role, t.amount, t.id, tf.fixed_fee, tt.name as transaction_type, ats.type as account_type, t.created_at 
+    FROM users u
+      left join accounts a on u.id = a.user_id
+      left join account_transactions atr on a.id = atr.account_id
+      left join account_types ats on ats.id = a.account_type_id
+      left join transactions t on t.id = atr.transaction_id
+      left join transaction_fees tf on tf.id = t.transaction_fee_id
+      left join transaction_types tt on tt.id = tf.transaction_type_id
+      ${dateCondition} and u.id = ?
+      order by t.created_at desc
+    `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [user_id], (err, results) => {
       if (err) {
         return reject(err);
       }
@@ -714,4 +754,5 @@ export default {
   getAccountStatuses,
   getMissingAccountTypesForUser,
   updateAccountStatus,
+  report,
 };
