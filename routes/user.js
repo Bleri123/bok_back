@@ -14,7 +14,7 @@ import { isActive } from "../middlewares/isActive.js";
 import express from "express";
 const router = express.Router();
 
-router.get("/", authenticateToken, isActive, isAdmin, getAllUsers);
+router.get("/", authenticateToken, getAllUsers);
 router.get(
   "/active-users",
   authenticateToken,
