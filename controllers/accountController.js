@@ -275,3 +275,15 @@ export const reportAccount = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const userReport = async (req, res) => {
+  try {
+    const user_id = req.user?.id;
+    const result = await queries.userReport(user_id);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error generating user report:", error);
+    res.status(500).json("Internal server error");
+  }
+};

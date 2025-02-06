@@ -720,6 +720,30 @@ async function report(user_id, filter) {
   });
 }
 
+async function userReport(user_id) {
+  const sql = `
+    SELECT u.id as user_id, u.first_name, u.last_name, a.account_number, atr.role, t.amount, t.id, tf.fixed_fee, tt.name as "transaction_type", ats.type, t.created_at 
+    FROM users u
+      LEFT JOIN accounts a ON u.id = a.user_id
+      LEFT JOIN account_transactions atr ON a.id = atr.account_id
+      LEFT JOIN account_types ats ON ats.id = a.account_type_id
+      LEFT JOIN transactions t ON t.id = atr.transaction_id
+      LEFT JOIN transaction_fees tf ON tf.id = t.transaction_fee_id
+      LEFT JOIN transaction_types tt ON tt.id = tf.transaction_type_id
+    WHERE t.id IS NOT NULL and u.id = ?
+    ORDER BY t.created_at DESC;
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [user_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
+
 export default {
   getUserId,
   accountExists,
@@ -755,4 +779,5 @@ export default {
   getMissingAccountTypesForUser,
   updateAccountStatus,
   report,
+  userReport,
 };
