@@ -17,6 +17,7 @@ import {
   accountStatusUpdate,
   reportAccount,
   userReport,
+  checkIfAccountExists,
 } from "../controllers/accountController.js";
 import { deleteAccount } from "../controllers/accountController.js";
 import express from "express";
@@ -66,4 +67,9 @@ router.post(
 
 router.get("/admin/user-report", authenticateToken, isAdmin, reportAccount);
 router.get("/users/user-report", authenticateToken, userReport);
+router.post(
+  "/check-account/account-number",
+  authenticateToken,
+  checkIfAccountExists
+);
 export default router;

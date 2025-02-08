@@ -287,3 +287,23 @@ export const userReport = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+export const checkIfAccountExists = async (req, res) => {
+  const receiver_account_number = req.body.receiver_account_number;
+  const sender_account_number = req.body?.sender_account_number;
+
+  try {
+    const result = await queries.checkIfAccountExists(
+      receiver_account_number,
+      sender_account_number
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error checking if account exists:", error);
+    if (error.message) {
+      res.status(404).json({ error_message: error.message });
+    } else {
+      res.status(500).json("Internal server error");
+    }
+  }
+};

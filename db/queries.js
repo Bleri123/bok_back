@@ -1,5 +1,10 @@
 import db from "./db.js";
 
+const TRANSACTION_TYPES = Object.freeze({
+  INTERNAL_TRANSFER: 3,
+  EXTERNAL_TRANSFER: 4,
+});
+
 const getUserId = async (email) => {
   const query = "SELECT id FROM users WHERE email = ?";
 
@@ -744,6 +749,139 @@ async function userReport(user_id) {
   });
 }
 
+async function checkIfAccountExists(
+  receiver_account_number,
+  sender_account_number
+) {
+  const sql = `
+    SELECT * FROM accounts WHERE account_number = ?;
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [receiver_account_number], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      if (results.length > 0) {
+        if (results[0].account_number == sender_account_number) {
+          reject(new Error("Cannot send money to the same account."));
+        } else {
+          resolve(results);
+        }
+      } else {
+        reject(new Error("Account does not exist."));
+      }
+    });
+  });
+}
+
+const insertAccountTransaction = async (accountNumber, transactionId, role) => {
+  try {
+    const query = `INSERT INTO account_transactions (account_id, transaction_id, role) VALUES (?, ?, ?)`;
+    return await db
+      .promise()
+      .query(query, [accountNumber, transactionId, role]);
+  } catch (error) {
+    console.error("Error inserting account transaction:", error);
+    throw error;
+  }
+};
+
+async function sendMoney(
+  user_id,
+  amount,
+  sender_account_number,
+  receiver_account_number
+) {
+  try {
+    amount = parseFloat(amount);
+    const checkAccountType = `SELECT * FROM accounts where user_id = ? and account_number = ?`;
+    const [accountType] = await db
+      .promise()
+      .query(checkAccountType, [user_id, receiver_account_number]);
+
+    console.log("accountType", accountType);
+
+    const accountTypeCode =
+      accountType.length > 0
+        ? TRANSACTION_TYPES.INTERNAL_TRANSFER
+        : TRANSACTION_TYPES.EXTERNAL_TRANSFER;
+    const sender_account_query = `SELECT * FROM accounts WHERE account_number = ?`;
+    const [sender_account] = await db
+      .promise()
+      .query(sender_account_query, [sender_account_number]);
+
+    const receiver_account_id =
+      accountType.length > 0 ? accountType[0].id : null;
+
+    const sender_account_id =
+      sender_account.length > 0 ? sender_account[0].id : null;
+    const transactionFeeQuery = `SELECT * FROM transaction_fees WHERE transaction_type_id = ?`;
+    const [transactionFee] = await db
+      .promise()
+      .query(transactionFeeQuery, [accountTypeCode]);
+
+    if (!transactionFee[0]) {
+      throw new Error("Transaction fee not found.");
+    }
+    const transactionFeeAmount = transactionFee[0].fixed_fee;
+    const transactionFeeId = transactionFee[0].id;
+
+    const amountWithFee = parseFloat(amount) + parseFloat(transactionFeeAmount);
+
+    const getAccountBalance = `SELECT balance FROM accounts WHERE account_number = ?`;
+    const [accountBalance] = await db
+      .promise()
+      .query(getAccountBalance, [sender_account_number]);
+
+    if (
+      accountBalance.length === 0 ||
+      accountBalance[0].balance < amountWithFee
+    ) {
+      const errorMessage =
+        transactionFeeAmount > 0
+          ? "Transaction cannot be processed due to insufficient balance, including the applicable transaction fee."
+          : "Insufficient balance.";
+      throw new Error(errorMessage);
+    }
+
+    const newTransaction = `INSERT INTO transactions (amount, transaction_fee_id, transaction_type_id, transaction_date, created_at) VALUES (?, ?, ?, now(), now())`;
+    const [newTransactionResult] = await db
+      .promise()
+      .query(newTransaction, [
+        amountWithFee,
+        transactionFeeId,
+        accountTypeCode,
+      ]);
+
+    const [newAccountTransactionSenderResult] = await insertAccountTransaction(
+      sender_account_id,
+      newTransactionResult.insertId,
+      "SENDER"
+    );
+    const [newAccountTransactionReceiverResult] =
+      await insertAccountTransaction(
+        receiver_account_id,
+        newTransactionResult.insertId,
+        "RECEIVER"
+      );
+
+    const sqlAdd = `UPDATE accounts SET balance = balance + ? WHERE account_number = ?`;
+    const sqlSubtract = `UPDATE accounts SET balance = balance - ? WHERE account_number = ?`;
+    const [updateAccountBalanceResultAdd] = await db
+      .promise()
+      .query(sqlAdd, [amount, receiver_account_number]);
+    const [updateAccountBalanceResultSubtract] = await db
+      .promise()
+      .query(sqlSubtract, [amountWithFee, sender_account_number]);
+
+    return "Transaction successful.";
+  } catch (error) {
+    console.error("Error sending money:", error);
+    throw error;
+  }
+}
+
 export default {
   getUserId,
   accountExists,
@@ -780,4 +918,6 @@ export default {
   updateAccountStatus,
   report,
   userReport,
+  checkIfAccountExists,
+  sendMoney,
 };
