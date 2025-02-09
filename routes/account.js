@@ -18,6 +18,7 @@ import {
   reportAccount,
   userReport,
   checkIfAccountExists,
+  userDepositMoney,
 } from "../controllers/accountController.js";
 import { deleteAccount } from "../controllers/accountController.js";
 import express from "express";
@@ -72,4 +73,6 @@ router.post(
   authenticateToken,
   checkIfAccountExists
 );
+
+router.post("/user/deposit", authenticateToken, userDepositMoney);
 export default router;

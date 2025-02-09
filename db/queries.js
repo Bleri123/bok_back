@@ -410,7 +410,7 @@ export async function createNewTransaction(
   });
 }
 
-export async function reduceBalance(new_balance, user_id, account_type_id) {
+export async function updateBalance(new_balance, user_id, account_type_id) {
   return await new Promise((resolve, reject) => {
     const sql = `UPDATE accounts set balance = ? where user_id = ? and account_type_id = ?`;
     db.query(sql, [new_balance, user_id, account_type_id], (err, results) => {
@@ -901,7 +901,7 @@ export default {
   getUserBalance,
   getTransactionFee,
   createNewTransaction,
-  reduceBalance,
+  updateBalance,
   createAccountTransaction,
   addBalanceToAccount,
   getAccountInformation,
